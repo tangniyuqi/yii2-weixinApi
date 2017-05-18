@@ -1,5 +1,15 @@
 <?php
-namespace yangshihe\weixinapi\base;
+/**
+ * Weixin
+ *
+ *@package vendor.tangniyuqi.yii2-weixinapi
+ *@author tangming <tangniyuqi@163.com>
+ *@copyright DNA <http://www.Noooya.com/>
+ *@version 1.0.0
+ *@since 2017-05-18 Create
+ *@todo N/A
+ */
+namespace tangniyuqi\weixinapi\base;
 
 use Yii;
 use yii\helpers\Json;
@@ -7,20 +17,11 @@ use DOMDocument;
 use DOMElement;
 use DOMText;
 
-/**
- * PHP WeixinApi API for Yii2
- *
- *@package common\helpers
- *@author yuzhiyang <yangshihe@qq.com>
- *@copyright yangshihe <yangshihe@qq.com/>
- *@version 1.0.0
- *@since 2016年8月10日
- *@todo
- */
-
 class Weixin
 {
-
+    /**
+     * @inheritdoc
+     */
     public $appid;
 
     public $appsecret;
@@ -41,52 +42,54 @@ class Weixin
 
     private $_token;
 
+    public $itemTag = 'item'; //微信xml格式的 itemTag name
+
+    /**
+     * @inheritdoc
+     */
     private $cacheName = [
         'access_token' => '',
         'jsapi_ticket' => '',
 
     ];
 
-    public $itemTag = 'item'; //微信xml格式的 itemTag name
-
+    /**
+     * @inheritdoc
+     */
     public function __construct($config)
     {
-
         $this->config = $config;
-
         $this->init();
 
-        // $this->_token = $this->access_token = $this->_model->access_token;
-
-        // $this->jsapi_ticket = $this->_model->jsapi_ticket;
-
-      //  $this->media_id = $media_id;
-
+        /*$this->_token = $this->access_token = $this->_model->access_token;
+        $this->jsapi_ticket = $this->_model->jsapi_ticket;
+        $this->media_id = $media_id;*/
     }
 
+    /**
+     * @inheritdoc
+     */
     public function init()
     {
-
         if (!isset($this->config['appid']) || !isset($this->config['appsecret'])) {
-
             throw new  \yii\web\ConflictHttpException('appid OR appsecret MUST be set');
         }
 
         $this->appid = $this->config['appid'];
-
         $this->appsecret = $this->config['appsecret'];
 
         //配置缓存
         $this->cacheName['access_token'] = $this->appid;
         $this->cacheName['jsapi_ticket'] = $this->appid . 'jsapi_ticket';
 
-        // unset($config);
+        //unset($config);
 
         $this->getAccessToken();
-
     }
 
-
+    /**
+     * @inheritdoc
+     */
     public function checkSignature($token)
     {
         $signature = Yii::$app->request->get('signature');
@@ -141,10 +144,6 @@ class Weixin
     }
     */
 
-
-
-
-
     //解析服务器发送的xml
     /*
     *   必须配置xml可以被接收
@@ -189,7 +188,7 @@ class Weixin
      * @param $type range in (text, image, voice, music, video, news)
      * @return string xml
      */
-    public function message($data, $type ='text')
+    public function message($data, $type = 'text')
     {
         $replyMessage = new ReplyMessage($this->requestData['FromUserName'], $this->requestData['ToUserName']);
 
@@ -204,16 +203,13 @@ class Weixin
      * 配置当前页面接口所需要的 jsticket,
      * @return string array
      */
-    public function getSignPackage() {
-
+    public function getSignPackage()
+    {
         $jsapiTicket = $this->getJsApiTicket();
-
         // 注意 URL 一定要动态获取，不能 hardcode.
         $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
         $url = "$protocol$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
-
         $timestamp = time();
-
         $nonceStr = $this->createNonceStr();
 
         // 这里参数的顺序要按照 key 值 ASCII 码升序排序
@@ -237,12 +233,15 @@ class Weixin
      * 16位 随机数
      * @return string
      */
-    private function createNonceStr($length = 16) {
+    private function createNonceStr($length = 16)
+    {
         $chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         $str = "";
+
         for ($i = 0; $i < $length; $i++) {
           $str .= substr($chars, mt_rand(0, strlen($chars) - 1), 1);
         }
+
         return $str;
     }
 
@@ -251,44 +250,32 @@ class Weixin
      * @param mixed $accessToken
      * @return string jsapi_ticket
      */
-    private function getJsApiTicket() {
-
-
+    private function getJsApiTicket()
+    {
         $jsapi_ticket = Yii::$app->cache->get($this->cacheName['jsapi_ticket']);
-
-
         $url = 'https://api.weixin.qq.com/cgi-bin/ticket/getticket?type=jsapi&access_token=' . $this->access_token;
 
-
         if (!$jsapi_ticket || !isset($jsapi_ticket['time']) ||  $jsapi_ticket['time'] > (time())) {
-
             $jsapi_ticket = [];
-
             $data = $this->Tkget($url);
-
             $data = Json::decode($data);
 
             if (isset($data['errcode']) && $data['errmsg'] != 'ok') {
-
                 $message = '获取jsapi_ticket错误：' . $this->getError($data['errcode']);
 
                 throw new \yii\web\ServerErrorHttpException($message);
-
             }
 
             $jsapi_ticket['data'] = $data['ticket'];
-
             $jsapi_ticket['time'] = time() + 5000;
 
             Yii::$app->cache->set($this->cacheName['jsapi_ticket'], $jsapi_ticket, 5000);
-
         }
 
         $this->jsapi_ticket = $jsapi_ticket['data'];
 
         return $this->jsapi_ticket;
     }
-
 
     /**
      * 获得 access_token
@@ -297,39 +284,29 @@ class Weixin
     public function getAccessToken()
     {
         $url = 'https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=' . $this->appid . '&secret=' . $this->appsecret;
-
         $access_token = Yii::$app->cache->get($this->cacheName['access_token']);
 
         if (!$access_token || !isset($access_token['time']) ||  $access_token['time'] > (time())) {
-
             $access_token = [];
-
             $data = $this->get($url);
-
             $data = Json::decode($data);
 
             if (isset($data['errcode'])) {
-
                 $message = '获取access_token错误：' . $this->getError($data['errcode']);
 
                 throw new \yii\web\ServerErrorHttpException($message);
-
             }
 
             $access_token['data'] = $data['access_token'];
-
             $access_token['time'] = time() + 5000;
 
             Yii::$app->cache->set($this->cacheName['access_token'], $access_token, 5000);
-
         }
 
         $this->access_token = $access_token['data'];
 
         return $this->access_token;
-
     }
-
 
     /**
      * 获取临时二维码 QR_SCENE
@@ -339,19 +316,16 @@ class Weixin
      * @param integer $time
      * @return binary
      */
-    public function qrcode($scene_id, $qr = 'QR_LIMIT_SCENE', $time = 1800){
-
+    public function qrcode($scene_id, $qr = 'QR_LIMIT_SCENE', $time = 1800)
+    {
         if ($qr == 'QR_LIMIT_SCENE') {
-
             $postjson = Json::encode([
                 'action_name' => 'QR_LIMIT_SCENE',
                 'action_info' => [
                     'scene' => ['scene_id' => $scene_id]
                 ]
             ]);
-
         } else {
-
             $postjson = Json::encode([
                 'expire_seconds' => $time,
                 'action_name' => 'QR_SCENE',
@@ -359,19 +333,15 @@ class Weixin
                     'scene' => ['scene_id' => $scene_id]
                 ]
             ]);
-
         }
 
         $url = 'https://api.weixin.qq.com/cgi-bin/qrcode/create?access_token=' . $this->access_token;
-
         $dataJson = $this->post($url, $postjson);
-
         $data = Json::decode($dataJson);
 
         if(isset($data['errcode'])) return $this->getError($data['errcode']) ;
 
         return $this->getQrcode($data['ticket']);
-
    }
 
     /**
@@ -379,37 +349,30 @@ class Weixin
      * @param string $ticket
      * @return binary
      */
-    public function getQrcode($ticket) {
-
+    public function getQrcode($ticket)
+    {
         $ticketUrl = 'https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=' . $ticket;
-
         $img = $this->get($ticketUrl);
 
         if($img) return $img; // 二进制文件
 
         return 'no image';
-
     }
-
 
     /**
      * 获取关注者的详细信息
      * @param string $openid
      * @return mixed
      */
-    public function userInfo($openid){
-
-
+    public function userInfo($openid)
+    {
         $url = 'https://api.weixin.qq.com/cgi-bin/user/info?access_token=' . $this->access_token . '&openid=' . $openid . '&lang=zh_CN ';
-
         $dataJson = $this->get($url);
-
         $data = Json::decode($dataJson);
 
         if(isset($data['errcode'])) return $this->getError($data['errcode']) ;
 
         return $data;
-
    }
 
    /**
@@ -417,20 +380,16 @@ class Weixin
      * @param array $data
      * @return mixed
      */
-    public function createMenu($data){
-
+    public function createMenu($data)
+    {
         $url = 'https://api.weixin.qq.com/cgi-bin/menu/create?access_token=' . $this->access_token;
-
         $data = Json::encode($data);
-
         $dataJson = $this->post($url, $data);
-
         $data = Json::decode($dataJson);
 
         if(isset($data['errcode']) && $data['errmsg'] != 'ok') return $this->getError($data['errcode']) ;
 
         return $data;
-
    }
 
     /**
@@ -440,7 +399,6 @@ class Weixin
      */
     public function get($url)
     {
-
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
         curl_setopt($ch, CURLOPT_URL, $url);
@@ -450,8 +408,8 @@ class Weixin
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         $response = curl_exec($ch);
         curl_close($ch);
-        return $response;
 
+        return $response;
    }
 
    /**
@@ -459,7 +417,8 @@ class Weixin
      * @param string $url
      * @return mixed
      */
-    private function Tkget($url) {
+    private function Tkget($url)
+    {
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_TIMEOUT, 500);
@@ -472,8 +431,6 @@ class Weixin
         return $res;
     }
 
-
-
     /**
      * post 请求,
      * @param string $url
@@ -482,7 +439,6 @@ class Weixin
      */
     public function post($url, $json)
     {
-
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
@@ -500,8 +456,8 @@ class Weixin
             return 'Errno'.curl_error($ch);
         }
         curl_close($ch);
-        return $tmpInfo;
 
+        return $tmpInfo;
     }
 
     /**
@@ -517,9 +473,9 @@ class Weixin
         $dom->appendChild($root);
         $this->buildXml($root, $data);
         $xml = $dom->saveXML();
+
         return trim(substr($xml, strpos($xml, '?>') + 2));
     }
-
 
     /**
      * @see yii\web\XmlResponseFormatter::buildXml()
@@ -557,11 +513,12 @@ class Weixin
         }
     }
 
+    /**
+     * @inheritdoc
+     */
     public function getError($errcode)
     {
-
         $array = [
-
             '-1' => '系统繁忙，此时请开发者稍候再试 ',
             '0' => '请求成功',
             '40001' => '获取access_token时AppSecret错误，或者access_token无效。请开发者认真比对AppSecret的正确性，或查看是否正在为恰当的公众号调用接口 ',
@@ -688,13 +645,9 @@ class Weixin
         ];
 
         if (!empty($errcode) && array_key_exists($errcode, $array)) {
-
             return $array[$errcode];
-
         }
 
         return '';
-
     }
-
 }
