@@ -1,8 +1,8 @@
 {
-    "name": "tangniyuqi/yii2-weixinApi",
-    "description": "The weixinApi extension for the Yii framework",
+    "name": "tangniyuqi/yii2-weixinapi",
+    "description": "The weixinapi extension for the Yii framework",
     "keywords": ["yii2", "extension", "weixin", "api"],
-    "homepage": "https://github.com/tangniyuqi/yii2-weixinApi",
+    "homepage": "https://github.com/tangniyuqi/yii2-weixinapi",
     "type": "yii2-extension",
     "language": "php",
     "license": "BSD 3-Clause",
@@ -20,7 +20,7 @@
     },
     "autoload": {
         "psr-4": {
-            "tangniyuqi\\weixinApi\\": ""
+            "tangniyuqi\\weixinapi\\": ""
         }
     },
     "extra": {
