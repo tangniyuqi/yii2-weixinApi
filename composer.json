@@ -1,7 +1,8 @@
 {
     "name": "tangniyuqi/yii2-weixinapi",
+    "version": "1.0.0",
     "description": "The weixinapi extension for the Yii framework",
-    "keywords": ["yii2", "extension", "weixin", "api"],
+    "keywords": ["yii2", "extension", "weixin"],
     "homepage": "https://github.com/tangniyuqi/yii2-weixinapi",
     "type": "yii2-extension",
     "language": "php",
@@ -21,11 +22,6 @@
     "autoload": {
         "psr-4": {
             "tangniyuqi\\weixinapi\\": ""
-        }
-    },
-    "extra": {
-        "branch-alias": {
-            "dev-master": "1.5.0-dev"
         }
     }
 }
