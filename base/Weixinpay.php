@@ -46,8 +46,8 @@ class Weixinpay
     {
 		$this->config = $config;
 
-		if (!isset($this->config['appid']) || !isset($this->config['appsecret'])) {
-			throw new \yii\web\ConflictHttpException('appid OR appsecret MUST be set.');
+		if (!isset($this->config['app_id']) || !isset($this->config['app_secret'])) {
+			throw new \yii\web\ConflictHttpException('app_id OR app_secret MUST be set.');
 		}
 
 		if (!isset($this->config['mch_id'])) {
@@ -65,7 +65,7 @@ class Weixinpay
 	public function getPrepayId($body, $out_trade_no, $total_fee, $notify_url, $trade_type = 'JSAPI')
     {
 		$data = array();
-		$data['appid'] = $this->config['appid'];
+		$data['appid'] = $this->config['app_id'];
 		$data['mch_id'] = $this->config['mch_id'];
 		$data['nonce_str'] = $this->getNonceString();
 		$data['body'] = $body;
@@ -96,7 +96,7 @@ class Weixinpay
 	public function getRefund()
     {
 		$data = array();
-		$data['appid'] = $this->config['appid'];
+		$data['appid'] = $this->config['app_id'];
 		$data['mch_id'] = $this->config['mch_id'];
 		$data['nonce_str'] = $this->getNonceString();
 		$data['out_trade_no'] = $this->config['out_trade_no'];
@@ -115,7 +115,7 @@ class Weixinpay
 	public function getPackage($prepay_id)
     {
 		$data = array();
-		$data['appId'] = $this->config['appid'];
+		$data['appId'] = $this->config['app_id'];
 		$data['timeStamp'] = (string) time();
 		$data['nonceStr'] = $this->getNonceString();
 		$data['package'] = 'prepay_id=' . $prepay_id;
@@ -163,7 +163,7 @@ class Weixinpay
 	public function queryOrder($out_trade_no)
     {
 		$data = array();
-		$data['appid'] = $this->config['appid'];
+		$data['appid'] = $this->config['app_id'];
 		$data['mch_id'] = $this->config['mch_id'];
 		$data['out_trade_no'] = $out_trade_no;
 		$data['nonce_str'] = $this->getNonceString();

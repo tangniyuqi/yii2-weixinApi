@@ -22,9 +22,9 @@ class Weixin
     /**
      * @inheritdoc
      */
-    public $appid;
+    public $app_id;
 
-    public $appsecret;
+    public $app_secret;
 
     public $access_token;
 
@@ -71,16 +71,16 @@ class Weixin
      */
     public function init()
     {
-        if (!isset($this->config['appid']) || !isset($this->config['appsecret'])) {
-            throw new  \yii\web\ConflictHttpException('appid OR appsecret MUST be set');
+        if (!isset($this->config['app_id']) || !isset($this->config['app_secret'])) {
+            throw new  \yii\web\ConflictHttpException('app_id OR app_secret MUST be set');
         }
 
-        $this->appid = $this->config['appid'];
-        $this->appsecret = $this->config['appsecret'];
+        $this->app_id = $this->config['app_id'];
+        $this->app_id = $this->config['app_secret'];
 
         //配置缓存
-        $this->cacheName['access_token'] = $this->appid;
-        $this->cacheName['jsapi_ticket'] = $this->appid . 'jsapi_ticket';
+        $this->cacheName['access_token'] = $this->app_id;
+        $this->cacheName['jsapi_ticket'] = $this->app_id.'jsapi_ticket';
 
         //unset($config);
 
@@ -137,7 +137,7 @@ class Weixin
                 $string1 .= "$k=$v&";
             }
         }
-        $stringSignTemp = $string1 . "key=" . $this->config["key"];
+        $stringSignTemp = $string1."key=".$this->config["key"];
         $sign = strtoupper(md5($stringSignTemp));
 
         return $sign;
@@ -207,7 +207,7 @@ class Weixin
     {
         $jsapiTicket = $this->getJsApiTicket();
         // 注意 URL 一定要动态获取，不能 hardcode.
-        $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+        $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443)? "https://": "http://";
         $url = "$protocol$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
         $timestamp = time();
         $nonceStr = $this->createNonceStr();
@@ -218,7 +218,7 @@ class Weixin
         $signature = sha1($string);
 
         $signPackage = array(
-          "appId"     => $this->appid,
+          "appId"     => $this->app_id,
           "nonceStr"  => $nonceStr,
           "timestamp" => $timestamp,
           "url"       => $url,
@@ -253,7 +253,7 @@ class Weixin
     private function getJsApiTicket()
     {
         $jsapi_ticket = Yii::$app->cache->get($this->cacheName['jsapi_ticket']);
-        $url = 'https://api.weixin.qq.com/cgi-bin/ticket/getticket?type=jsapi&access_token=' . $this->access_token;
+        $url = 'https://api.weixin.qq.com/cgi-bin/ticket/getticket?type=jsapi&access_token='.$this->access_token;
 
         if (!$jsapi_ticket || !isset($jsapi_ticket['time']) ||  $jsapi_ticket['time'] > (time())) {
             $jsapi_ticket = [];
@@ -261,7 +261,7 @@ class Weixin
             $data = Json::decode($data);
 
             if (isset($data['errcode']) && $data['errmsg'] != 'ok') {
-                $message = '获取jsapi_ticket错误：' . $this->getError($data['errcode']);
+                $message = '获取jsapi_ticket错误：'.$this->getError($data['errcode']);
 
                 throw new \yii\web\ServerErrorHttpException($message);
             }
@@ -283,7 +283,7 @@ class Weixin
      */
     public function getAccessToken()
     {
-        $url = 'https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=' . $this->appid . '&secret=' . $this->appsecret;
+        $url = 'https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid='.$this->app_id.'&secret='.$this->app_secret;
         $access_token = Yii::$app->cache->get($this->cacheName['access_token']);
 
         if (!$access_token || !isset($access_token['time']) ||  $access_token['time'] > (time())) {
@@ -292,7 +292,7 @@ class Weixin
             $data = Json::decode($data);
 
             if (isset($data['errcode'])) {
-                $message = '获取access_token错误：' . $this->getError($data['errcode']);
+                $message = '获取access_token错误：'.$this->getError($data['errcode']);
 
                 throw new \yii\web\ServerErrorHttpException($message);
             }
@@ -335,7 +335,7 @@ class Weixin
             ]);
         }
 
-        $url = 'https://api.weixin.qq.com/cgi-bin/qrcode/create?access_token=' . $this->access_token;
+        $url = 'https://api.weixin.qq.com/cgi-bin/qrcode/create?access_token='.$this->access_token;
         $dataJson = $this->post($url, $postjson);
         $data = Json::decode($dataJson);
 
@@ -351,7 +351,7 @@ class Weixin
      */
     public function getQrcode($ticket)
     {
-        $ticketUrl = 'https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=' . $ticket;
+        $ticketUrl = 'https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket='.$ticket;
         $img = $this->get($ticketUrl);
 
         if($img) return $img; // 二进制文件
@@ -366,7 +366,7 @@ class Weixin
      */
     public function userInfo($openid)
     {
-        $url = 'https://api.weixin.qq.com/cgi-bin/user/info?access_token=' . $this->access_token . '&openid=' . $openid . '&lang=zh_CN ';
+        $url = 'https://api.weixin.qq.com/cgi-bin/user/info?access_token='.$this->access_token.'&openid='.$openid.'&lang=zh_CN ';
         $dataJson = $this->get($url);
         $data = Json::decode($dataJson);
 
@@ -382,7 +382,7 @@ class Weixin
      */
     public function createMenu($data)
     {
-        $url = 'https://api.weixin.qq.com/cgi-bin/menu/create?access_token=' . $this->access_token;
+        $url = 'https://api.weixin.qq.com/cgi-bin/menu/create?access_token='.$this->access_token;
         $data = Json::encode($data);
         $dataJson = $this->post($url, $data);
         $data = Json::decode($dataJson);
@@ -468,7 +468,7 @@ class Weixin
      */
     public function xml(array $data, $charset = null)
     {
-        $dom = new DOMDocument('1.0', $charset === null ? Yii::$app->charset : $charset);
+        $dom = new DOMDocument('1.0', $charset === null? Yii::$app->charset: $charset);
         $root = new DOMElement('xml');
         $dom->appendChild($root);
         $this->buildXml($root, $data);
@@ -499,11 +499,11 @@ class Weixin
                 if (is_int($name) && is_object($value)) {
                     $this->buildXml($element, $value);
                 } elseif (is_array($value) || is_object($value)) {
-                    $child = new DOMElement(is_int($name) ? $this->itemTag : $name);
+                    $child = new DOMElement(is_int($name)? $this->itemTag: $name);
                     $element->appendChild($child);
                     $this->buildXml($child, $value);
                 } else {
-                    $child = new DOMElement(is_int($name) ? $this->itemTag : $name);
+                    $child = new DOMElement(is_int($name)? $this->itemTag: $name);
                     $element->appendChild($child);
                     $child->appendChild(new DOMText((string) $value));
                 }
