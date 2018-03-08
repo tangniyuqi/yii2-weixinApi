@@ -6,7 +6,7 @@
     "homepage": "https://github.com/tangniyuqi/yii2-weixinapi",
     "type": "yii2-extension",
     "language": "php",
-    "license": "BSD 3-Clause",
+    "license": "MIT",
     "minimum-stability": "stable",
     "authors": [
         {
@@ -16,7 +16,6 @@
         }
     ],
     "require": {
-        "php": ">=5.4.0",
         "yiisoft/yii2": "*"
     },
     "autoload": {
